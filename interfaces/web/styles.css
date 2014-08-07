@@ -1,0 +1,89 @@
+body {
+	background-color: white;
+	font-family: Helvetica, Verdana, Arial, Lucida Grande, sans-serif;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+table {
+	font-size: 24pt;
+}
+
+table.square td {
+	text-align: center;
+	vertical-align: middle;
+	border: 1px black solid;
+	border-radius: 15px;
+	cursor: pointer;
+}
+
+table.square td:hover {
+	background-color: LightGray;
+	cursor: pointer;
+}
+
+table.square td:active {
+	background-color: gray;
+	
+}
+
+.big {
+	font-size: 48pt;
+}
+
+.smaller {
+	font-size: 24pt !important;
+}
+
+.small {
+	font-size: 12pt;
+}
+
+.box_rotate {
+     -moz-transform: rotate(-90deg);  /* FF3.5+ */
+       -o-transform: rotate(-90deg);  /* Opera 10.5 */
+  -webkit-transform: rotate(-90deg);  /* Saf3.1+, Chrome */
+             filter:  progid:DXImageTransform.Microsoft.BasicImage(rotation=0.083);  /* IE6,IE7 */
+         -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=0.083)"; /* IE8 */
+}
+
+.box_rotate180 {
+     -moz-transform: rotate(180deg);  /* FF3.5+ */
+       -o-transform: rotate(180deg);  /* Opera 10.5 */
+  -webkit-transform: rotate(180deg);  /* Saf3.1+, Chrome */
+             filter:  progid:DXImageTransform.Microsoft.BasicImage(rotation=0.083);  /* IE6,IE7 */
+         -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=0.083)"; /* IE8 */
+}
+
+
+
+.noborder {
+	border: none !important;
+}
+
+.nohover {
+	cursor: default !important;
+}
+.nohover:hover {
+	background-color: white !important;
+}
+
+.nohover:active {
+	background-color: white !important;
+}
+
+#dvda { color: red;}
+
+#dvdb { color: green;}
+
+#dvdc { color: yellow;}
+
+#dvdd { color: blue;}
+
+span.bigger {font-size: 150%;}
+
+.noclear { clear: none; }

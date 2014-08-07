@@ -1,0 +1,62 @@
+<launch>
+	<arg name="projector_camera_id" default="0"/>
+	<arg name="camera" default="projector_cam"/>
+
+	<arg name="ip"/>
+	<arg name="port"/>
+
+	<param name="study_data_dir" value="$(find projector_interface)/study/data"/>
+
+	<!-- config -->
+	<include file="$(find projector_interface)/study/launch/setup.launch"/>
+
+	<param name="/screen/border_x" type="double" value="0.35"/>
+	<param name="/screen/border_y" type="double" value="0.35"/>
+
+	<!-- webcam driver  -->
+	<include file="$(find simple_webcam)/launch/camera_pipeline.launch">
+		<arg name="camera_id" value="$(arg projector_camera_id)"/>
+		<arg name="info_url" value="file://$(find projector_interface)/study/cfg/camera.yaml"/>
+		<arg name="camera" value="$(arg camera)"/>
+	</include>
+
+	<!-- ar_pose -->
+	<node name="ar_pose" pkg="ar_pose" type="ar_single" respawn="false" output="screen">
+		<param name="marker_pattern" type="string" value="$(find ar_pose)/data/4x4/4x4_9.patt"/>
+		<param name="marker_width" type="double" value="152.4"/>
+		<param name="marker_center_x" type="double" value="0.0"/>
+		<param name="marker_center_y" type="double" value="0.0"/>
+		<param name="threshold" type="int" value="100"/>
+		<param name="use_history" type="bool" value="true"/>
+		<param name="marker_frame" value="bottom_left"/>
+	</node>
+
+	<!-- projection system -->
+	<include file="$(find projector_interface)/launch/calibrate_and_circle.launch">
+		<arg name="flip" value="false"/>
+		<arg name="calibrate" value="true"/>
+		<arg name="calibration_camera" value="$(arg camera)"/>
+		<arg name="window_size" value="1"/>
+	</include>
+
+	<!-- glass -->
+
+	<!-- 	fake face detection frame - assume a person is standing (approx 1.7 meters high)
+	yaw (4th number) will need to be adjusted since glass' 0 is at magnetic north -->
+	<node args="0 0 1.7 0 0 0 world /face_detection 100" name="face_detection" pkg="tf" type="static_transform_publisher"/>
+
+<!-- 	<include file="$(find projector_interface)/study/launch/glass.launch">
+		<arg name="ip" value="$(arg ip)"/>
+		<arg name="port" value="$(arg port)"/>
+	</include> -->
+
+	<!-- Intersect the pose with the screen plane -->
+<!-- 	<node name="intersect_plane" pkg="world_intersect" type="intersect_plane.py">
+		<remap from="pose" to="head_pose"/>
+		<param name="plane_frame" value="bottom_left"/>
+  </node> -->
+
+  
+
+
+</launch>

@@ -1,0 +1,180 @@
+<html>
+  <head>
+    <meta content="text/html; charset=windows-1252" http-equiv="content-type">
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <script src="jquery-1.11.1.min.js"></script>
+    <script src="eventemitter2.min.js"></script>
+    <script src="roslib.min.js"></script>
+    <script>
+var ros = new ROSLIB.Ros({
+	url : 'ws://10.214.152.93:9090'
+});
+
+ros.on('connection', function() {
+	console.log('Connected to websocket server.');
+});
+
+var cmdPub = new ROSLIB.Topic({
+	ros : ros,
+	name : '/remote_cmd',
+	messageType : 'std_msgs/String'
+});
+
+var request = ROSLIB.ServiceRequest({});
+
+
+var playClient = new ROSLIB.Service({
+	ros : ros,
+	name : '/play',
+	serviceType : 'vlc/Play'
+
+})
+
+var pauseClient = new ROSLIB.Service({
+	ros : ros,
+	name : '/pause',
+	serviceType : 'vlc/Pause'
+
+})
+
+var muteClient = new ROSLIB.Service({
+	ros : ros,
+	name : '/toggle_mute',
+	serviceType : 'vlc/MuteToggle'
+
+})
+
+var backClient = new ROSLIB.Service({
+	ros : ros,
+	name : '/back10',
+	serviceType : 'vlc/Back10'
+
+})
+
+var forwardClient = new ROSLIB.Service({
+	ros : ros,
+	name : '/forward10',
+	serviceType : 'vlc/Forward10'
+
+})
+
+
+function sendRequest(client) {
+	client.callService(request, function(result) {
+		console.log(result)
+	})	
+}
+
+
+function sendCommand(id) {
+	cmdPub.publish(new ROSLIB.Message({
+		data : id
+	}))
+}
+
+function square(obj) {
+	squares = obj.find('td')
+	side = Math.max(squares.width(), squares.height())
+	squares.height(side)
+	squares.width(side)
+}
+
+$().ready(function() {
+	square($('table.square'))
+
+	$('table.square td').click(function() {
+		if(this.id == 'dvdplay') {
+			sendRequest(playClient)
+		} else if(this.id == 'dvdpause') {
+			sendRequest(pauseClient)
+		} else if(this.id == 'dvdmute') {
+			sendRequest(muteClient)
+		} else if(this.id == 'dvdff') {
+			sendRequest(forwardClient)
+		} else if(this.id == 'dvdrw') {
+			sendRequest(backClient)
+		}
+	})
+
+
+})
+</script> </head>
+  <body>
+    <!-- TV Controls -->
+    <fieldset><legend>TV Controls</legend>
+    <table class="square">
+      <tbody>
+        <tr>
+          <td id="tvpow">TV</td>
+          <td class="big" id="tvup">&uarr;</td>
+          <td id="tvmenu">Menu</td>
+          <td class="big" id="tvvolup">+</td>
+        </tr>
+        <tr>
+          <td class="big" id="tvleft">&larr;</td>
+          <td class="big" id="tvok">&#10003;</td>
+          <td class="big" id="tvr">&rarr; </td>
+          <td class="noborder box_rotate nohover">Volume<br>
+          <td id="tvmute">Mute<br>
+        </tr>
+        <tr>
+          <td>QMenu</td>
+          <td class="big" id="tvdn">&darr;</td>
+          <td id="tvexit">Exit</td>
+          <td class="big" id="tvvoldn">-</td>
+        </tr>
+      </tbody>
+    </table>
+    </fieldset>
+    <!-- DVD Controls -->
+    <fieldset><legend>DVD Controls</legend>
+    <table class="square">
+      <tbody>
+        <tr>
+          <td id="dvdpow">DVD</td>
+          <td class="big" id="dvdup">&uarr;</td>
+          <td id="dvdhome">Home</td>
+          <td class="big" id="dvdvolup">+</td>
+          <td class="big" id="dvdstop">&#x25a0;</td>
+          <td class="big" id="dvdplay">&#9656;</td>
+          <td id="dvdpause" class="box_rotate big">=</td>
+          <td class="big" id="dvdeject">&#x23cf;</td>
+        </tr>
+        <tr>
+          <td class="big" id="dvdleft">&larr;</td>
+          <td class="big" id="dvdok">&#10003;</td>
+          <td class="big" id="dvdr">&rarr; </td>
+          <td class="noborder box_rotate nohover">Volume<br>
+          </td>
+          <td class="big" id="dvdlast">&#x20d3;&#9666;</td>
+          <td class="big" id="dvdrw">&#9666;&#9666;</td>
+          <td class="big" id="dvdff">&#9656;&#9656;</td>
+          <td class="big" id="dvdnext">&#9656; &#x20d3;</td>
+        </tr>
+        <tr>
+          <td class="br">Audio<br>
+            Input</td>
+          <td class="big" id="dvddn">&darr;</td>
+          <td id="tvexit">Return</td>
+          <td class="big" id="dvdvoldn">-</td>
+          <td id="dvda">A</td>
+          <td id="dvdb">B</td>
+          <td id="dvdc">C</td>
+          <td id="dvdd">D</td>
+        </tr>
+        <tr>
+          <td>Sound</td>
+          <td id="dvddn">Display</td>
+          <td id="tvexit">Disk<br>
+            Menu</td>
+          <td id="dvdmute">Mute</td>
+          <td id="dvdsubtitle">Subtitle</td>
+          <td id="dvd123">123</td>
+          <td id="dvdnight">Night</td>
+          <td id="dvdroku">Roku</td>
+        </tr>
+      </tbody>
+    </table>
+    </fieldset>
+  </body>
+</html>
