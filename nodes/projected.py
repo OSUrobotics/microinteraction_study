@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import roslib; roslib.load_manifest('projected_interface_builder')
 from projected_interface_builder.projected_interface import ProjectedInterface
 from projected_interface_builder.data_structures import PolygonInfo
