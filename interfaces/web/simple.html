@@ -5,9 +5,11 @@
     <script src="jquery-1.11.1.min.js"></script>
     <script src="eventemitter2.min.js"></script>
     <script src="roslib.min.js"></script>
+    <script src="querystring.js"></script>
     <script>
+
 var ros = new ROSLIB.Ros({
-	url : 'ws://10.214.152.93:9090'
+	url : 'ws://'+$.QueryString['rosbridge_server']+':9090'
 });
 
 ros.on('connection', function() {
