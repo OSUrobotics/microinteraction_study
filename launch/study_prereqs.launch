@@ -2,26 +2,41 @@
 	<arg name="projector_camera_id" default="0"/>
 	<arg name="camera" default="projector_cam"/>
 
-	<arg name="ip"/>
-	<arg name="port"/>
+	<!-- <param name="study_data_dir" value="$(find projector_interface)/study/data"/> -->
 
-	<param name="study_data_dir" value="$(find projector_interface)/study/data"/>
+	<!-- note:  microinteraction_study need to be in the same place on the remote machine -->
+	<machine
+		name="tv"
+		address="dvalinn.local"
+		env-loader="$(find microinteraction_study)/setup.sh"
+		user="lazewatd"
+	/>
+
+	<!-- services for interacting with VLC -->
+	<node name="vlc" type="vlcplayer.py" pkg="vlc" machine="tv" output="screen"/>
+
+	<!-- run devilspie2 to put the various windows on the right screens -->
+	<node name="devilspie2" type="run_devilspie2.sh" pkg="microinteraction_study" machine="tv" output="screen"/>
+
+	<!-- rosbridge -->
+	<include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+
 
 	<!-- config -->
-	<include file="$(find projector_interface)/study/launch/setup.launch"/>
+<!-- 	<include file="$(find projector_interface)/study/launch/setup.launch"/>
 
 	<param name="/screen/border_x" type="double" value="0.35"/>
 	<param name="/screen/border_y" type="double" value="0.35"/>
-
+ -->
 	<!-- webcam driver  -->
-	<include file="$(find simple_webcam)/launch/camera_pipeline.launch">
+<!-- 	<include file="$(find simple_webcam)/launch/camera_pipeline.launch">
 		<arg name="camera_id" value="$(arg projector_camera_id)"/>
 		<arg name="info_url" value="file://$(find projector_interface)/study/cfg/camera.yaml"/>
 		<arg name="camera" value="$(arg camera)"/>
-	</include>
+	</include> -->
 
 	<!-- ar_pose -->
-	<node name="ar_pose" pkg="ar_pose" type="ar_single" respawn="false" output="screen">
+<!-- 	<node name="ar_pose" pkg="ar_pose" type="ar_single" respawn="false" output="screen">
 		<param name="marker_pattern" type="string" value="$(find ar_pose)/data/4x4/4x4_9.patt"/>
 		<param name="marker_width" type="double" value="152.4"/>
 		<param name="marker_center_x" type="double" value="0.0"/>
@@ -30,25 +45,27 @@
 		<param name="use_history" type="bool" value="true"/>
 		<param name="marker_frame" value="bottom_left"/>
 	</node>
-
+ -->
 	<!-- projection system -->
-	<include file="$(find projector_interface)/launch/calibrate_and_circle.launch">
+	<include file="$(find projector_interface)/launch/calibrate_and_circle+machine.launch">
 		<arg name="flip" value="false"/>
+		<arg name="machine" value="tv"/>
 		<arg name="calibrate" value="true"/>
 		<arg name="calibration_camera" value="$(arg camera)"/>
 		<arg name="window_size" value="1"/>
 	</include>
+
+	<!-- projected interface -->
+	<!-- <node name="projected" pkg="microinteraction_study" type="projected.py" args="$(find microinteraction_study)/interfaces/projected.pkl"/> -->
+
+	<!-- study sequencer -->
+	<!-- <node name="sequencer" pkg="microinteraction_study" type="run_study.py"/> -->
 
 	<!-- glass -->
 
 	<!-- 	fake face detection frame - assume a person is standing (approx 1.7 meters high)
 	yaw (4th number) will need to be adjusted since glass' 0 is at magnetic north -->
 	<node args="0 0 1.7 0 0 0 world /face_detection 100" name="face_detection" pkg="tf" type="static_transform_publisher"/>
-
-<!-- 	<include file="$(find projector_interface)/study/launch/glass.launch">
-		<arg name="ip" value="$(arg ip)"/>
-		<arg name="port" value="$(arg port)"/>
-	</include> -->
 
 	<!-- Intersect the pose with the screen plane -->
 <!-- 	<node name="intersect_plane" pkg="world_intersect" type="intersect_plane.py">
