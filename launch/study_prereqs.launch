@@ -29,23 +29,26 @@
 	<param name="/screen/border_y" type="double" value="0.35"/>
  -->
 	<!-- webcam driver  -->
-<!-- 	<include file="$(find simple_webcam)/launch/camera_pipeline.launch">
+	<include file="$(find simple_webcam)/launch/camera_pipeline+machine.launch">
+		<arg name="machine" value="tv"/>
 		<arg name="camera_id" value="$(arg projector_camera_id)"/>
 		<arg name="info_url" value="file://$(find projector_interface)/study/cfg/camera.yaml"/>
 		<arg name="camera" value="$(arg camera)"/>
-	</include> -->
+	</include>
 
 	<!-- ar_pose -->
-<!-- 	<node name="ar_pose" pkg="ar_pose" type="ar_single" respawn="false" output="screen">
-		<param name="marker_pattern" type="string" value="$(find ar_pose)/data/4x4/4x4_9.patt"/>
+	<node name="ar_pose" pkg="ar_pose" type="ar_single" respawn="false" output="screen">
+		<param name="marker_pattern" type="string" value="$(find ar_pose)/data/4x4/4x4_30.patt"/>
 		<param name="marker_width" type="double" value="152.4"/>
 		<param name="marker_center_x" type="double" value="0.0"/>
 		<param name="marker_center_y" type="double" value="0.0"/>
 		<param name="threshold" type="int" value="100"/>
 		<param name="use_history" type="bool" value="true"/>
 		<param name="marker_frame" value="bottom_left"/>
+		<remap from="/camera/camera_info" to="$(arg camera)/camera_info"/>
+		<remap from="/camera/image_raw" to="$(arg camera)/image_raw"/>
 	</node>
- -->
+
 	<!-- projection system -->
 	<include file="$(find projector_interface)/launch/calibrate_and_circle+machine.launch">
 		<arg name="flip" value="false"/>
@@ -56,7 +59,7 @@
 	</include>
 
 	<!-- projected interface -->
-	<!-- <node name="projected" pkg="microinteraction_study" type="projected.py" args="$(find microinteraction_study)/interfaces/projected.pkl"/> -->
+	<node name="projected" pkg="microinteraction_study" type="projected.py" args="$(find microinteraction_study)/interfaces/projected.pkl"/>
 
 	<!-- study sequencer -->
 	<!-- <node name="sequencer" pkg="microinteraction_study" type="run_study.py"/> -->
