@@ -68,13 +68,23 @@
 
 	<!-- 	fake face detection frame - assume a person is standing (approx 1.7 meters high)
 	yaw (4th number) will need to be adjusted since glass' 0 is at magnetic north -->
-	<node args="0 0 1.7 0 0 0 world /face_detection 100" name="face_detection" pkg="tf" type="static_transform_publisher"/>
+    <arg name="face_frame_pub" value="face_detection"/>
+	<node args="0 0 1.7 0 0 0 world /face_detection 100" name="$(arg face_frame_pub)" pkg="reconfigurable_transform_publisher" type="transform_publisher.py"/>
+
+    <!--node name="adjust_face_detection" type="glass_offset.py" pkg="microinteraction_study" args="$(arg face_frame_pub)"/-->
+
+    <arg name="bottom_left_reconfig_pub" value="bottom_left_reconfig_pub"/>
+	<node name="$(arg bottom_left_reconfig_pub)" pkg="reconfigurable_transform_publisher" type="transform_publisher.py" clear_params="true"/>
+
+    <node name="staticify_marker" pkg="reconfigurable_transform_publisher" type="make_static.py" args="-r $(arg bottom_left_reconfig_pub) -k projector_cam_rgb_optical_frame bottom_left -w 10"/>
+
+	<node args="0 0 1.0 0 0 0 world /$(arg camera)_link 100" name="camera_tf" pkg="reconfigurable_transform_publisher" type="transform_publisher.py"/>
 
 	<!-- Intersect the pose with the screen plane -->
-<!-- 	<node name="intersect_plane" pkg="world_intersect" type="intersect_plane.py">
-		<remap from="pose" to="head_pose"/>
+ 	<node name="intersect_plane" pkg="world_intersect" type="intersect_plane.py">
+		<remap from="pose" to="/android/pose"/>
 		<param name="plane_frame" value="bottom_left"/>
-  </node> -->
+  </node>
 
   
 
