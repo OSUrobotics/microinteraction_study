@@ -11,7 +11,7 @@ COND_PROJECTED  = 3
 
 CONDITIONS = [1,2,3]
 
-VIDEO_DIR='~/videos'
+VIDEO_DIR='/home/lazewatd/videos'
 
 class VideoInfo:
     def __init__(self, quiz_url, filename, duration):
@@ -58,11 +58,11 @@ STIMULUS_SEQUENCE = [
     services.forward10,
     services.forward10,
     services.forward10,
-    # services.pause,
-    # services.pause,
-    # services.pause,
-    # services.pause,
-    # services.pause,
+    services.pause,
+    services.pause,
+    services.pause,
+    services.pause,
+    services.pause,
     services.toggle_mute,
     services.toggle_mute,
     services.toggle_mute,
@@ -116,17 +116,34 @@ def generate_sequence():
 def run_study():
     subject_id = generate_subject_id()
 
+    # wait for the start video service
+    rospy.wait_for_service('start_video')
+
     # run the practice video
     vid = Videos.london1
     services.start_video(os.path.join(VIDEO_DIR, vid.filename))
-    while topics.playback_time[0].data <= vid.duration:
-        pass
 
+    # wait for vlc to be ready after starting the video
+    while 'vlc_ready' not in parameters and not parameters.vlc_ready:
+        rospy.sleep(0.1)    
+
+    # wait for the practice video to run
+    rate = Rate(2)
+    print 'Playing practice video'
+    while ok() and topics.playback_time[0].data.to_sec() < vid.duration.to_sec()-2:
+        print topics.playback_time[0].data, vid.duration
+        rate.sleep()
+
+    # make really sure the video is stopped
+    # services.stop()
+
+    print 'Starting conditions'
     for condition in generate_sequence():
         print 'starting condition', condition
         if condition == COND_PROJECTED:
+            print '1'
             # show the projected interface
-            services.tv_interface.display_unmute()
+            services.projected.display_unmute()
         else:
             # TODO: make sure the web interface is showing
             # rospy.Timer(rospy.Duration(0.0000001), lambda x: webbrowser.open(WEB_INTERFACE), oneshot=True)
@@ -135,6 +152,11 @@ def run_study():
         vid = COND_VIDEOS[condition]
         stim_seq = get_stimulus_sequence(vid)
         services.start_video(os.path.join(VIDEO_DIR, vid.filename))
+        
+        # wait for vlc to be ready after starting the video
+        while 'vlc_ready' not in parameters and not parameters.vlc_ready:
+            rospy.sleep(0.1)    
+
         # while topics.playback_time[0].data <= vid.duration:
         stim_time, (stim, st) = stim_seq.pop()
         for t in topics.playback_time[:]:
@@ -149,8 +171,11 @@ def run_study():
                 print 'done'
                 break
 
+        # make really sure the video is stopped
+        # services.stop()
+
         # hide the projected interface (regardless of if it's open)
-        services.tv_interface.display_mute()
+        services.projected.display_mute()
 
         print 'opening quiz'
         # open up the quiz in the browser
