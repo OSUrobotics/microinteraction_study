@@ -1,6 +1,8 @@
 <launch>
 	<arg name="projector_camera_id" default="0"/>
 	<arg name="camera" default="projector_cam"/>
+	<arg name="ip" default="0.0.0.0"/>
+	<arg name="port" default="9999"/>
 
 	<!-- <param name="study_data_dir" value="$(find projector_interface)/study/data"/> -->
 
@@ -65,13 +67,15 @@
 	<!-- <node name="sequencer" pkg="microinteraction_study" type="run_study.py"/> -->
 
 	<!-- glass -->
+	<node name="sensor_bridge" type="glassSensorBridge.py" pkg="glass_ros_bridge" args="$(arg ip) $(arg port)"/>
+	<node name="start_glass" type="start_glass" pkg="glass_ros_bridge"/>
 
-	<!-- 	fake face detection frame - assume a person is standing (approx 1.7 meters high)
+	<!-- 	fake face detection frame - assume a person is standing (approx 1.0 meters high)
 	yaw (4th number) will need to be adjusted since glass' 0 is at magnetic north -->
     <arg name="face_frame_pub" value="face_detection"/>
-	<node args="0 0 1.7 0 0 0 world /face_detection 100" name="$(arg face_frame_pub)" pkg="reconfigurable_transform_publisher" type="transform_publisher.py"/>
+	<node args="0 0 1.0 0 0 0 world /face_detection 100" name="$(arg face_frame_pub)" pkg="reconfigurable_transform_publisher" type="transform_publisher.py"/>
 
-    <!--node name="adjust_face_detection" type="glass_offset.py" pkg="microinteraction_study" args="$(arg face_frame_pub)"/-->
+    <node name="adjust_face_detection" type="glass_offset.py" pkg="microinteraction_study" args="$(arg face_frame_pub)"/>
 
     <arg name="bottom_left_reconfig_pub" value="bottom_left_reconfig_pub"/>
 	<node name="$(arg bottom_left_reconfig_pub)" pkg="reconfigurable_transform_publisher" type="transform_publisher.py" clear_params="true"/>
