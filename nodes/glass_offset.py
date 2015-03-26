@@ -21,8 +21,8 @@ if __name__ == '__main__':
     r,p,y = rot.Inverse().GetRPY()
 
     config = client.get_configuration()
-    config.yaw -= y + pi
-    #config.pitch -= p
-    #config.roll -= r
+    config.yaw -= y
+    # config.pitch -= p
+    # config.roll -= r
 
     client.update_configuration(config)
