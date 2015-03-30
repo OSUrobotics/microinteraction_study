@@ -4,6 +4,7 @@
 	<arg name="ip" default="0.0.0.0"/>
 	<arg name="port" default="9999"/>
 
+	<arg name="wall_frame_id" default="ar_marker_0"/>
 	<!-- <param name="study_data_dir" value="$(find projector_interface)/study/data"/> -->
 
 	<!-- note:  microinteraction_study need to be in the same place on the remote machine -->
@@ -38,18 +39,14 @@
 		<arg name="camera" value="$(arg camera)"/>
 	</include>
 
-	<!-- ar_pose -->
-	<node name="ar_pose" pkg="ar_pose" type="ar_single" respawn="false" output="screen">
-		<param name="marker_pattern" type="string" value="$(find ar_pose)/data/4x4/4x4_30.patt"/>
-		<param name="marker_width" type="double" value="152.4"/>
-		<param name="marker_center_x" type="double" value="0.0"/>
-		<param name="marker_center_y" type="double" value="0.0"/>
-		<param name="threshold" type="int" value="100"/>
-		<param name="use_history" type="bool" value="true"/>
-		<param name="marker_frame" value="bottom_left"/>
-		<remap from="/camera/camera_info" to="$(arg camera)/camera_info"/>
-		<remap from="/camera/image_raw" to="$(arg camera)/image_raw"/>
-	</node>
+	<!-- wall marker -->
+	<node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect" respawn="false" output="screen"
+		args="12
+		      0.08
+		      0.2
+		      $(arg camera)/image_raw
+		      $(arg camera)/camera_info
+		      /world" />
 
 	<!-- projection system -->
 	<include file="$(find projector_interface)/launch/calibrate_and_circle+machine.launch">
@@ -62,6 +59,11 @@
 
 	<!-- projected interface -->
 	<node name="projected" pkg="microinteraction_study" type="projected.py" args="$(find microinteraction_study)/interfaces/projected.pkl"/>
+
+	<!-- set the interface's frame -->
+	<node name="$(anon dynparam)" pkg="dynamic_reconfigure" type="dynparam" args="set_from_parameters projected">
+		<param name="frame_id" type="string" value="$(arg wall_frame_id)" />
+	</node>
 
 	<!-- study sequencer -->
 	<!-- <node name="sequencer" pkg="microinteraction_study" type="run_study.py"/> -->
@@ -80,17 +82,17 @@
 
     <node name="adjust_face_detection" type="glass_offset.py" pkg="microinteraction_study" args="$(arg glass_adjust_pub)"/>
 
-    <arg name="bottom_left_reconfig_pub" value="bottom_left_reconfig_pub"/>
-	<node name="$(arg bottom_left_reconfig_pub)" pkg="reconfigurable_transform_publisher" type="transform_publisher.py" clear_params="true"/>
+    <arg name="wall_frame_reconfig_pub" value="$(arg wall_frame_id)_reconfig_pub"/>
+	<node name="$(arg wall_frame_reconfig_pub)" pkg="reconfigurable_transform_publisher" type="transform_publisher.py" clear_params="true"/>
 
-    <node name="staticify_marker" pkg="reconfigurable_transform_publisher" type="make_static.py" args="-r $(arg bottom_left_reconfig_pub) -k projector_cam_rgb_optical_frame bottom_left -w 10"/>
+    <node name="staticify_marker" pkg="reconfigurable_transform_publisher" type="make_static.py" args="-r $(arg wall_frame_reconfig_pub) -k projector_cam_rgb_optical_frame $(arg wall_frame_id) -w 10"/>
 
 	<node args="0 0 1.0 0 0 0 world /$(arg camera)_link 100" name="camera_tf" pkg="reconfigurable_transform_publisher" type="transform_publisher.py"/>
 
 	<!-- Intersect the pose with the screen plane -->
  	<node name="intersect_plane" pkg="world_intersect" type="intersect_plane.py">
 		<remap from="pose" to="/android/pose"/>
-		<param name="plane_frame" value="bottom_left"/>
+		<param name="plane_frame" value="$(arg wall_frame_id)"/>
   </node>
 
   
