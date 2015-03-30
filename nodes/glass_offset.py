@@ -5,7 +5,7 @@ import tf
 from PyKDL import Rotation
 from reconfigurable_transform_publisher.cfg import TransformConfig
 import dynamic_reconfigure.client
-from math import pi
+from math import pi, degrees
 
 # find the rotation between the glass frame and the face detection frame, and
 # rotate the face detection frame by its inverse
@@ -25,4 +25,5 @@ if __name__ == '__main__':
     # config.pitch -= p
     # config.roll -= r
 
+    rospy.logdebug('offset is %s degrees' % degrees(y))
     client.update_configuration(config)
