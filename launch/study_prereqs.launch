@@ -75,7 +75,10 @@
     <arg name="face_frame_pub" value="face_detection"/>
 	<node args="0 0 1.0 0 0 0 world /face_detection 100" name="$(arg face_frame_pub)" pkg="reconfigurable_transform_publisher" type="transform_publisher.py"/>
 
-    <node name="adjust_face_detection" type="glass_offset.py" pkg="microinteraction_study" args="$(arg face_frame_pub)"/>
+    <arg name="glass_adjust_pub" value="glass_adjust"/>
+	<node args="0 0 0 0 0 0 /face_detection /glass_adjust 100" name="$(arg glass_adjust_pub)" pkg="reconfigurable_transform_publisher" type="transform_publisher.py"/>
+
+    <node name="adjust_face_detection" type="glass_offset.py" pkg="microinteraction_study" args="$(arg glass_adjust_pub)"/>
 
     <arg name="bottom_left_reconfig_pub" value="bottom_left_reconfig_pub"/>
 	<node name="$(arg bottom_left_reconfig_pub)" pkg="reconfigurable_transform_publisher" type="transform_publisher.py" clear_params="true"/>
