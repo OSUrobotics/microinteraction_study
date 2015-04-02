@@ -154,3 +154,16 @@ catkin_package(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+install(
+  PROGRAMS
+    nodes/glass_offset.py
+    nodes/projected.py
+    nodes/run_devilspie2.sh
+    nodes/run_study.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+
+install(DIRECTORY launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+)
