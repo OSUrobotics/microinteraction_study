@@ -95,7 +95,6 @@
 		<param name="plane_frame" value="$(arg wall_frame_id)"/>
   </node>
 
-  
-
+  <node name="splashscreen" type="splashscreen.py" pkg="splashscreen" machine="tv"/>
 
 </launch>
