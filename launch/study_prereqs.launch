@@ -58,7 +58,14 @@
 	</include>
 
 	<!-- projected interface -->
-	<node name="projected" pkg="microinteraction_study" type="projected.py" args="$(find microinteraction_study)/interfaces/projected.pkl"/>
+	<node name="projected" pkg="microinteraction_study" type="projected.py" args="$(find microinteraction_study)/interfaces/projected.pkl">
+		<param name="start_muted" value="true"/>
+	</node>
+
+	<!-- practice_interface -->
+	<node name="practice" pkg="microinteraction_study" type="practice.py" args="$(find microinteraction_study)/interfaces/practice.pkl">
+		<param name="start_muted" value="true"/>
+	</node>
 
 	<!-- set the interface's frame -->
 	<node name="$(anon dynparam)" pkg="dynamic_reconfigure" type="dynparam" args="set_from_parameters projected">
@@ -80,7 +87,7 @@
     <arg name="glass_adjust_pub" value="glass_adjust"/>
 	<node args="0 0 0 0 0 0 /face_detection /glass_adjust 100" name="$(arg glass_adjust_pub)" pkg="reconfigurable_transform_publisher" type="transform_publisher.py"/>
 
-    <node name="adjust_face_detection" type="glass_offset.py" pkg="microinteraction_study" args="$(arg glass_adjust_pub)"/>
+    <!-- <node name="adjust_face_detection" type="glass_offset.py" pkg="microinteraction_study" args="$(arg glass_adjust_pub)"/> -->
 
     <arg name="wall_frame_reconfig_pub" value="$(arg wall_frame_id)_reconfig_pub"/>
 	<node name="$(arg wall_frame_reconfig_pub)" pkg="reconfigurable_transform_publisher" type="transform_publisher.py" clear_params="true"/>
