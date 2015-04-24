@@ -71,9 +71,9 @@ class Videos:
         pre=[packages.glass_ros_bridge.nodes.start_glass,
              services.projected.display_unmute,
              partial(
-                packages.splashscreen.nodes.splashscreen_py(
-                    'hide_web',
-                    'Please use the projected inferface for this video')
+                packages.splashscreen.nodes.splashscreen_py,
+                'Please use the projected inferface for this video',
+                node_name='hide_web',
              )
             ],
         post=[packages.glass_ros_bridge.nodes.stop_glass,
@@ -184,7 +184,7 @@ def run_study():
         'Move your head so that the right edge of the Glass screen\n'
         'is just touching the right edge of the screen you\'re reading this on.\n'
         'When the edges are aligned, tap on the right stem to continue.\n')
-    packages.microinteraction_study.nodes.glass_offset_py('glass_offset_node', 'glass_adjust')
+    packages.microinteraction_study.nodes.glass_offset_py('glass_adjust', node_name='glass_offset_node')
 
     # now that glass is calibrated, start some practice
     topics.splashscreen.message(
