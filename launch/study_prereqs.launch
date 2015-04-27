@@ -113,5 +113,6 @@
   </node>
 
   <node name="splashscreen" type="splashscreen.py" pkg="splashscreen" machine="tv"/>
+  <node name="splashscreen_local" type="splashscreen.py" pkg="splashscreen"/>
 
 </launch>

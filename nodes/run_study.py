@@ -7,6 +7,7 @@ import rospy
 import numpy as np
 import os
 from functools import partial
+import rosgraph
 
 
 COND_BASELINE   = 0
@@ -27,6 +28,13 @@ class VideoInfo:
         self.instr_text = instr_text
         self.pre = pre
         self.post = post
+
+COND_STR = {
+    COND_BASELINE: 'COND_BASELINE: London 1',
+    COND_SCREEN: 'COND_SCREEN: UK',
+    COND_PROJ_MOUSE: 'COND_PROJ_MOUSE: EU',
+    COND_PROJ_GLASS: 'COND_PROJ_GLASS: London 2'
+}
 
 class Videos:
 
@@ -49,45 +57,50 @@ class Videos:
         'http://oregonstate.qualtrics.com/SE/?SID=SV_b89FnVhhBcavwZ7&subject_id=%s',
         'eu.mp4',
         rospy.Duration(350),
+        # rospy.Duration(10),
         pre=[services.projected.display_unmute,
              partial(packages.splashscreen.nodes.mouse_capture_py,
-                '_frame_id:=%s' % parameters.wall_frame_id,
                 node_name=parameters.mouse_capture_name())
             ],
         post=[partial(kill, nodes[parameters.mouse_capture_name()]),
               services.projected.display_mute],
-        instr_text='COND_PROJ_MOUSE'
+        instr_text=('In this condition, you will use a projected interface\n'
+                    'in conjunction with a standard computer mouse.\n'
+                    'When you\'re ready, click to continue.')
     )
     london1 = VideoInfo(  # COND_BASELINE
         'http://oregonstate.qualtrics.com/SE/?SID=SV_a2Gew0tRFAMLUY5&subject_id=%s',
         'london1.mp4',
         rospy.Duration(287),
-        instr_text='COND_BASELINE'
+        # rospy.Duration(10),
+        instr_text=('This condition does not have any interruptions.\n'
+                    'Sit back, relax, and absorb the information.\n'
+                    'When you\'re ready, click to continue.')
+
     )
     london2 = VideoInfo(  # COND_PROJ_GLASS
         'http://oregonstate.qualtrics.com/SE/?SID=SV_eP71O4yatU9m24l&subject_id=%s',
         'london2.mp4',
         rospy.Duration(347),
+        # rospy.Duration(10),
         pre=[packages.glass_ros_bridge.nodes.start_glass,
-             services.projected.display_unmute,
-             partial(
-                packages.splashscreen.nodes.splashscreen_py,
-                'Please use the projected inferface for this video',
-                node_name='hide_web',
-             )
-            ],
+             services.projected.display_unmute],
         post=[packages.glass_ros_bridge.nodes.stop_glass,
              services.projected.display_mute,
              partial(kill, nodes.hide_web)],
-        instr_text='COND_PROJ_GLASS'
-
+        instr_text=('In this condition, you will use a projected interface\n'
+                    'in conjunction with Google Glass.\n'
+                    'When you\'re ready, click to continue.')
     )
     uk = VideoInfo(  # COND_SCREEN
         'http://oregonstate.qualtrics.com/SE/?SID=SV_0PvRmY0tbwg2Vpj&subject_id=%s',
         'uk.mp4',
         rospy.Duration(314),
+        # rospy.Duration(10),
         pre=[partial(webbrowser.open, WEB_INTERFACE)],
-        instr_text='COND_SCREEN'
+        instr_text=('In this condition, you will use a browser-based interface\n'
+                    'in conjunction with a standard computer mouse.\n'
+                    'When you\'re ready, click to continue.')
     )
 
 STIMULUS_SEQUENCE = [
@@ -135,9 +148,11 @@ SEQ_TITLES = [
     'vol_dn',
 ]
 
-def show_instructions_and_wait(text):
-    topics.splashscreen.message(text)
-    rospy.wait_for_message('/click', msg.std_msgs.Empty)
+
+def show_instructions_and_wait(text, local=False):
+    ns = 'splashscreen' + ('_local' if local else '')
+    topics[ns].message(text)
+    rospy.wait_for_message(rosgraph.names.ns_join(ns, 'advance'), msg.std_msgs.Empty)
 
 def get_stimulus_sequence(video):
     # set the seeed so we get "random" but consistent sequences
@@ -153,7 +168,8 @@ def generate_subject_id():
 def generate_sequence(subject_id):
     # random.seed(subject_id)
     # return random.sample(list(enumerate(Videos)), len(Videos))
-    return [(0, Videos[0])]
+    # return [(0, Videos[0]), (1, Videos[1])]
+    return [(COND_PROJ_MOUSE, Videos[COND_PROJ_MOUSE])]
 
 def show_quiz(vid, subject_id):
     print 'opening quiz'
@@ -184,9 +200,11 @@ def run_study():
         'Move your head so that the right edge of the Glass screen\n'
         'is just touching the right edge of the screen you\'re reading this on.\n'
         'When the edges are aligned, tap on the right stem to continue.\n')
+
+
     packages.microinteraction_study.nodes.glass_offset_py('glass_adjust', node_name='glass_offset_node')
 
-    # now that glass is calibrated, start some practice
+    now that glass is calibrated, start some practice
     topics.splashscreen.message(
         'You should see a series of shapes projected on the wall.\n'
         'The rotation of your head controls the blue cursor.\n'
@@ -197,57 +215,34 @@ def run_study():
     rospy.wait_for_message('/practice/finished', msg.std_msgs.Empty)
     services.practice.display_mute()
 
-    # Instructions
-    # topics.splashscreen.message(
-    #     'You will be shown a short informational video.\n'
-    #     'Please pay attention to details. There will be a quiz at the end\n'
-    #     'Tap on the right stem to continue.')
-
-    # # wait for the start video service
-    # rospy.wait_for_message('/click', msg.std_msgs.Empty)
-    # rospy.wait_for_service('start_video')
-
-    # # run the practice video
-    # vid = Videos.london1
-    # services.start_video(os.path.join(VIDEO_DIR, vid.filename))
-
-    # # wait for vlc to be ready after starting the video
-    # while 'vlc_ready' not in parameters and not parameters.vlc_ready:
-    #     rospy.sleep(0.1)
-
-    # # wait for the practice video to run
-    # rate = Rate(2)
-    # print 'Playing practice video'
-    # while ok() and topics.playback_time[0].data.to_sec() < vid.duration.to_sec()-2:
-    #     print topics.playback_time[0].data, vid.duration
-    #     rate.sleep()
-
-    # show_quiz(vid, subject_id)
-    # make really sure the video is stopped
-    # services.stop()
-
     packages.glass_ros_bridge.nodes.stop_glass()
 
     print 'Starting conditions'
     for condition, vid in generate_sequence(subject_id):
         to_kill = []
-        print 'starting condition', condition
-        services.start_video(os.path.join(VIDEO_DIR, vid.filename))
-        
+        print 'starting condition', COND_STR[condition]
+
         # show the instructions
+        show_instructions_and_wait(vid.instr_text, local=True)
 
         # run the prereqs
         for c in vid.pre:
-            called = c()        
+            called = c()
+
+        services.start_video(os.path.join(VIDEO_DIR, vid.filename))
 
         # wait for vlc to be ready after starting the video
-        while 'vlc_ready' not in parameters and not parameters.vlc_ready:
+        while 'vlc_ready' not in parameters and not parameters.vlc_ready():
             rospy.sleep(0.1)
 
-        # while topics.playback_time[0].data <= vid.duration:
+        # make sure the volume is at 100%
+        services.set_vol(255)
+
         if condition != COND_BASELINE:
             stim_seq = get_stimulus_sequence(vid)
         else:
+            # since stim_seq needs to be nonempty,
+            # let's add one that does nothing way in the future
             stim_seq = [(1000000000, (lambda : None, 'noop'))]
         stim_time, (stim, st) = stim_seq.pop()
         for t in topics.playback_time[:]:
@@ -262,12 +257,13 @@ def run_study():
                 print 'done'
                 break
 
-        for n in to_kill: kill(n)
+        services.stop()
+
+        for n in to_kill: kill(n)        
 
         # run the postreqs
         for c in vid.post:
             c()
-
         # show the quiz
         show_quiz(vid, subject_id)
 
