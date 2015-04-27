@@ -8,6 +8,13 @@
 
 	<param name="wall_frame_id" value="$(arg wall_frame_id)"/>
 	<param name="mouse_capture_name" value="mouse_capture_node"/>
+
+	<!-- params for mouse capture node (launched in run_study.py) -->
+	<group ns="mouse_capture_node">
+		<param name="frame_id" value="$(arg wall_frame_id)"/>
+		<param name="offset_x" value="-0.5"/>
+		<param name="offset_y" value="0"/>
+	</group>
 	<!-- <param name="study_data_dir" value="$(find projector_interface)/study/data"/> -->
 
 	<!-- note:  microinteraction_study need to be in the same place on the remote machine -->
