@@ -188,8 +188,11 @@ def run_study():
     # have the user calibrate the glass frame
     show_instructions_and_wait(
         'Please put on Google Glass.\n'
-        'Note that you will not need to be able to read its screen.\n'
-        'When you have it on comfortably, tap on the right stem to continue.\n'
+        'Note that you will not need to\n'
+        'be able to read its screen.\n'
+        'When you have it on\n'
+        'comfortably, tap on the\n'
+        'right stem to continue.\n'
     )
 
     rospy.wait_for_service('/projected/display_mute')
@@ -197,21 +200,28 @@ def run_study():
 
     # wait for click
     show_instructions_and_wait(
-        'Move your head so that the right edge of the Glass screen\n'
-        'is just touching the right edge of the screen you\'re reading this on.\n'
-        'When the edges are aligned, tap on the right stem to continue.\n')
+        'Move your head so that the\n'
+        'right edge of the Glass screen\n'
+        'is just touching the right edge\n'
+        'of the screen you\'re reading this\n'
+        'on. When the edges are aligned,\n'
+        'tap on the right stem to continue.\n')
 
 
     packages.microinteraction_study.nodes.glass_offset_py('glass_adjust', node_name='glass_offset_node')
 
-    now that glass is calibrated, start some practice
-    topics.splashscreen.message(
-        'You should see a series of shapes projected on the wall.\n'
-        'The rotation of your head controls the blue cursor.\n'
-        'Please move the cursor into the orange shape and click.\n'
-        'If you have any questions, ask the experimenter.'
-    )
+    #now that glass is calibrated, start some practice
     services.practice.display_unmute()
+    topics.splashscreen.message(
+        'You should see a series of\n'
+        'shapes projected to the right.\n'
+        'The rotation of your head\n'
+        'controls the blue cursor.\n'
+        'Please move the cursor into\n'
+        'the orange shape and click.\n'
+        'If you have any questions,\n'
+        'ask the experimenter.'
+    )
     rospy.wait_for_message('/practice/finished', msg.std_msgs.Empty)
     services.practice.display_mute()
 
