@@ -1,0 +1,5 @@
+<launch>
+	<node name="fake_glass" pkg="microinteraction_study" type="fake_glass.py"/> 
+	<node name="fake_glass_frame" pkg="reconfigurable_transform_publisher" type="transform_publisher.py"
+		args="0 0 1 0 0 0 glass_adjust glass 100"/>
+</launch>
