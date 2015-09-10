@@ -1,5 +1,5 @@
 #!/usr/bin/env rosh
-import webbrowser
+import webbrowser as wb
 import hashlib
 import time
 import random
@@ -9,6 +9,7 @@ import os
 from functools import partial
 import rosgraph
 
+webbrowser = wb.get('firefox')
 
 COND_BASELINE   = 0
 COND_SCREEN     = 1
@@ -17,7 +18,7 @@ COND_PROJ_GLASS = 3
 
 CONDITIONS = [1,2,3]
 
-VIDEO_DIR = '/home/lazewatd/videos'
+VIDEO_DIR = '/home/thrain/videos'
 
 WEB_INTERFACE = 'file://' + os.path.join(packages.microinteraction_study.path, 'interfaces', 'web', 'simple.html')
 class VideoInfo:
@@ -40,14 +41,15 @@ class Videos:
 
     class __metaclass__(type):
         def __len__(self):
-            return 4
+            #return 4
+            return 3
 
         def __getitem__(self, idx):
             return {
                 COND_BASELINE: self.london1,
                 COND_SCREEN: self.uk,
                 COND_PROJ_MOUSE: self.eu,
-                COND_PROJ_GLASS: self.london2
+                #COND_PROJ_GLASS: self.london2
             }[idx]
 
         def __iter__(self):
@@ -104,26 +106,24 @@ class Videos:
     )
 
 STIMULUS_SEQUENCE = [
-    services.forward10,
-    services.forward10,
-    services.forward10,
-    services.forward10,
-    services.forward10,
+    services.forward10slow,
+    services.forward10slow,
+    services.forward10slow,
+    services.forward10slow,
+    services.forward10slow,
+    services.forward10slow,
     services.pause,
     services.pause,
     services.pause,
     services.pause,
     services.pause,
-    services.toggle_mute,
-    services.toggle_mute,
-    services.toggle_mute,
-    services.toggle_mute,
-    services.toggle_mute,
-    lambda : (services.vol_dn() and services.vol_dn() and services.vol_dn() and services.vol_dn()),
-    lambda : (services.vol_dn() and services.vol_dn() and services.vol_dn() and services.vol_dn()),
-    lambda : (services.vol_dn() and services.vol_dn() and services.vol_dn() and services.vol_dn()),
-    lambda : (services.vol_dn() and services.vol_dn() and services.vol_dn() and services.vol_dn()),
-    lambda : (services.vol_dn() and services.vol_dn() and services.vol_dn() and services.vol_dn()),
+    services.pause,
+    lambda: services.set_vol(160),
+    lambda: services.set_vol(160),
+    lambda: services.set_vol(160),
+    lambda: services.set_vol(160),
+    lambda: services.set_vol(160),
+    lambda: services.set_vol(160),
 ]
 SEQ_TITLES = [
     'forward10',
@@ -131,16 +131,14 @@ SEQ_TITLES = [
     'forward10',
     'forward10',
     'forward10',
+    'forward10',
     'pause',
     'pause',
     'pause',
     'pause',
     'pause',
-    'mute',
-    'mute',
-    'mute',
-    'mute',
-    'mute',
+    'pause',
+    'vol_dn',
     'vol_dn',
     'vol_dn',
     'vol_dn',
@@ -166,13 +164,15 @@ def generate_subject_id():
     return hashlib.md5(str(time.time())).hexdigest()[:10]
 
 def generate_sequence(subject_id):
-    # random.seed(subject_id)
-    # return random.sample(list(enumerate(Videos)), len(Videos))
+    #random.seed(subject_id)
+    random.seed(0)
+    return random.sample(list(enumerate(Videos)), len(Videos))
     # return [(0, Videos[0]), (1, Videos[1])]
-    return [(COND_PROJ_MOUSE, Videos[COND_PROJ_MOUSE])]
+    #return [(COND_PROJ_MOUSE, Videos[COND_PROJ_MOUSE])]
+    #return [(COND_PROJ_GLASS, Videos[COND_PROJ_GLASS])]
 
 def show_quiz(vid, subject_id):
-    print 'opening quiz'
+    print 'opening quiz: ', vid.quiz % subject_id
     # open up the quiz in the browser
     rospy.Timer(rospy.Duration(0.0000001), lambda x: webbrowser.open(vid.quiz % subject_id), oneshot=True)
     # webbrowser.open(vid.quiz)
@@ -186,44 +186,44 @@ def run_study():
     subject_id = generate_subject_id()
 
     # have the user calibrate the glass frame
-    show_instructions_and_wait(
-        'Please put on Google Glass.\n'
-        'Note that you will not need to\n'
-        'be able to read its screen.\n'
-        'When you have it on\n'
-        'comfortably, tap on the\n'
-        'right stem to continue.\n'
-    )
+    # show_instructions_and_wait(
+    #     'Please put on Google Glass.\n'
+    #     'Note that you will not need to\n'
+    #     'be able to read its screen.\n'
+    #     'When you have it on\n'
+    #     'comfortably, tap on the\n'
+    #     'right stem to continue.\n'
+    # )
 
-    rospy.wait_for_service('/projected/display_mute')
-    services.projected.display_mute()
+    # rospy.wait_for_service('/projected/display_mute')
+    # services.projected.display_mute()
 
-    # wait for click
-    show_instructions_and_wait(
-        'Move your head so that the\n'
-        'right edge of the Glass screen\n'
-        'is just touching the right edge\n'
-        'of the screen you\'re reading this\n'
-        'on. When the edges are aligned,\n'
-        'tap on the right stem to continue.\n')
+    # # wait for click
+    # show_instructions_and_wait(
+    #     'Move your head so that the\n'
+    #     'right edge of the Glass screen\n'
+    #     'is just touching the right edge\n'
+    #     'of the screen you\'re reading this\n'
+    #     'on. When the edges are aligned,\n'
+    #     'tap on the right stem to continue.\n')
 
 
-    packages.microinteraction_study.nodes.glass_offset_py('glass_adjust', node_name='glass_offset_node')
+    # packages.microinteraction_study.nodes.glass_offset_py('glass_adjust', node_name='glass_offset_node')
 
-    #now that glass is calibrated, start some practice
-    services.practice.display_unmute()
-    topics.splashscreen.message(
-        'You should see a series of\n'
-        'shapes projected to the right.\n'
-        'The rotation of your head\n'
-        'controls the blue cursor.\n'
-        'Please move the cursor into\n'
-        'the orange shape and click.\n'
-        'If you have any questions,\n'
-        'ask the experimenter.'
-    )
-    rospy.wait_for_message('/practice/finished', msg.std_msgs.Empty)
-    services.practice.display_mute()
+    # #now that glass is calibrated, start some practice
+    # services.practice.display_unmute()
+    # topics.splashscreen.message(
+    #     'You should see a series of\n'
+    #     'shapes projected to the right.\n'
+    #     'The rotation of your head\n'
+    #     'controls the blue cursor.\n'
+    #     'Please move the cursor into\n'
+    #     'the orange shape and click.\n'
+    #     'If you have any questions,\n'
+    #     'ask the experimenter.'
+    # )
+    # rospy.wait_for_message('/practice/finished', msg.std_msgs.Empty)
+    # services.practice.display_mute()
 
     packages.glass_ros_bridge.nodes.stop_glass()
 
@@ -245,8 +245,8 @@ def run_study():
         while 'vlc_ready' not in parameters and not parameters.vlc_ready():
             rospy.sleep(0.1)
 
-        # make sure the volume is at 100%
-        services.set_vol(255)
+        # make sure the volume is at ~150% (calibrated)
+        services.set_vol(400)
 
         if condition != COND_BASELINE:
             stim_seq = get_stimulus_sequence(vid)
@@ -272,6 +272,7 @@ def run_study():
         for n in to_kill: kill(n)        
 
         # run the postreqs
+        print 'killing condition-speicific nodes'
         for c in vid.post:
             c()
         # show the quiz
