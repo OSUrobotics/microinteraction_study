@@ -230,6 +230,7 @@ def run_study():
     print 'Starting conditions'
     for condition, vid in generate_sequence(subject_id):
         to_kill = []
+        parameters.condition = COND_STR[condition]
         print 'starting condition', COND_STR[condition]
 
         # show the instructions
