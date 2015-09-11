@@ -27,6 +27,9 @@
 		password="projectorslave"
 	/>
 
+	<!-- logging -->
+	<node name="bagger" type="record" pkg="rosbag" args="/command_report -o $(env HOME)/study_logs/log"/>
+
 	<!-- services for interacting with VLC -->
 	<node name="vlc" type="vlcplayer.py" pkg="vlc" machine="tv" output="screen"/>
 
