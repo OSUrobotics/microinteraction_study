@@ -12,17 +12,19 @@
 	<!-- params for mouse capture node (launched in run_study.py) -->
 	<group ns="mouse_capture_node">
 		<param name="frame_id" value="$(arg wall_frame_id)"/>
-		<param name="offset_x" value="-0.5"/>
-		<param name="offset_y" value="0"/>
+		<param name="offset_x" value="-0.65"/>
+		<param name="offset_y" value="-0.2"/>
+		<param name="scale" value="0.0003"/>
 	</group>
 	<!-- <param name="study_data_dir" value="$(find projector_interface)/study/data"/> -->
 
 	<!-- note:  microinteraction_study need to be in the same place on the remote machine -->
 	<machine
 		name="tv"
-		address="dvalinn.local"
-		env-loader="$(find microinteraction_study)/setup.sh"
-		user="lazewatd"
+		address="thrain"
+		env-loader="/home/thrain/workspaces/dan_study_ws/src/microinteraction_study/setup.sh"
+		user="thrain"
+		password="projectorslave"
 	/>
 
 	<!-- services for interacting with VLC -->
@@ -42,8 +44,9 @@
 	<param name="/screen/border_y" type="double" value="0.35"/>
  -->
 	<!-- webcam driver  -->
-	<include file="$(find simple_webcam)/launch/camera_pipeline+machine.launch">
-		<arg name="machine" value="tv"/>
+	<!--include file="$(find simple_webcam)/launch/camera_pipeline+machine.launch"-->
+	<include file="$(find simple_webcam)/launch/camera_pipeline.launch">
+		<!--arg name="machine" value="tv"/-->
 		<arg name="camera_id" value="$(arg projector_camera_id)"/>
 		<arg name="info_url" value="file://$(find projector_interface)/study/cfg/camera.yaml"/>
 		<arg name="camera" value="$(arg camera)"/>
@@ -86,8 +89,9 @@
 	<!-- <node name="sequencer" pkg="microinteraction_study" type="run_study.py"/> -->
 
 	<!-- glass -->
-	<node name="sensor_bridge" type="glassSensorBridge.py" pkg="glass_ros_bridge" args="$(arg ip) $(arg port)"/>
-	<node name="start_glass" type="start_glass" pkg="glass_ros_bridge"/>
+	<!--node name="sensor_bridge" type="glassSensorBridge.py" pkg="glass_ros_bridge" args="$(arg ip) $(arg port)"/-->
+    <!--node name="vec2pose" type="vec2pose.py" pkg="glass_ros_bridge"/-->
+	<!--node name="start_glass" type="start_glass" pkg="glass_ros_bridge"/-->
 
 	<!-- 	fake face detection frame - assume a person is standing (approx 1.0 meters high)
 	yaw (4th number) will need to be adjusted since glass' 0 is at magnetic north -->
@@ -112,7 +116,11 @@
 		<param name="plane_frame" value="$(arg wall_frame_id)"/>
   </node>
 
-  <node name="splashscreen" type="splashscreen.py" pkg="splashscreen" machine="tv"/>
-  <node name="splashscreen_local" type="splashscreen.py" pkg="splashscreen"/>
+  <node name="splashscreen" type="splashscreen.py" pkg="splashscreen" machine="tv">
+    <env name="DISPLAY" value=":0"/>
+  </node>
+  <node name="splashscreen_local" type="splashscreen.py" pkg="splashscreen">
+    <env name="DISPLAY" value=":0"/>
+  </node>
 
 </launch>
