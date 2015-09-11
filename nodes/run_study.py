@@ -20,8 +20,6 @@ COND_PROJ_GLASS = 3
 
 CONDITIONS = [1,2,3]
 
-BAG_ARGS = 'rosbag record -O %s /command_report'
-
 VIDEO_DIR = '/home/thrain/videos'
 
 WEB_INTERFACE = 'file://' + os.path.join(packages.microinteraction_study.path, 'interfaces', 'web', 'simple.html')
@@ -285,6 +283,5 @@ def run_study():
         # show the quiz
         show_quiz(vid, subject_id)
 
-    bag_process.terminate()
 
 run_study()
