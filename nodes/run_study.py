@@ -8,6 +8,8 @@ import numpy as np
 import os
 from functools import partial
 import rosgraph
+import shlex
+import subprocess
 
 webbrowser = wb.get('firefox')
 
@@ -17,6 +19,8 @@ COND_PROJ_MOUSE = 2
 COND_PROJ_GLASS = 3
 
 CONDITIONS = [1,2,3]
+
+BAG_ARGS = 'rosbag record -O %s /command_report'
 
 VIDEO_DIR = '/home/thrain/videos'
 
@@ -227,6 +231,8 @@ def run_study():
 
     packages.glass_ros_bridge.nodes.stop_glass()
 
+    parameters.subject_id = subject_id
+
     print 'Starting conditions'
     for condition, vid in generate_sequence(subject_id):
         to_kill = []
@@ -278,5 +284,7 @@ def run_study():
             c()
         # show the quiz
         show_quiz(vid, subject_id)
+
+    bag_process.terminate()
 
 run_study()
