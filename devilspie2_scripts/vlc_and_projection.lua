@@ -13,3 +13,13 @@ if (get_application_name()=="VLC media player") then
 	set_window_position(0,0);
 	maximize();
 end
+
+if (get_window_name()=="splashscreen.py") then
+    set_window_position(0,0)
+    set_on_top()
+end
+
+if (get_window_name()=="mouse_capture.py") then
+    set_on_top()
+end
+

@@ -166,8 +166,8 @@ def generate_subject_id():
     return hashlib.md5(str(time.time())).hexdigest()[:10]
 
 def generate_sequence(subject_id):
-    #random.seed(subject_id)
-    random.seed(0)
+    random.seed(subject_id)
+    #random.seed(0)
     return random.sample(list(enumerate(Videos)), len(Videos))
     # return [(0, Videos[0]), (1, Videos[1])]
     #return [(COND_PROJ_MOUSE, Videos[COND_PROJ_MOUSE])]
